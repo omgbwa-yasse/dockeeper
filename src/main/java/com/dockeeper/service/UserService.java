@@ -87,7 +87,7 @@ public class UserService {
                     savePasswordResetToken(user, token);
                     
                     // Send email
-                    String resetUrl = "http://localhost:8080/reset-password?token=" + token;
+                    String resetUrl = "http://localhost:8099/reset-password?token=" + token;
                     String emailBody = "Click the link to reset your password: " + resetUrl;
                     emailService.sendEmail(user.getEmail(), "Password Reset", emailBody);
                     
