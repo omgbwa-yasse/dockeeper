@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{menu/header :: header('Folders')}"></head>
+<body>
+    <div th:replace="~{menu/sidebar :: sidebar}"></div>
+    
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+                <i class="bi bi-folder"></i>
+                <span th:if="${currentFolder == null}">All Folders</span>
+                <span th:if="${currentFolder != null}" th:text="${currentFolder.name}"></span>
+            </h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group me-2">
+                    <a th:href="@{/folders/new}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-folder-plus"></i> New Folder
+                    </a>
+                    <a th:if="${currentFolder != null}" th:href="@{/documents/upload(folderId=${currentFolder.id})}" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-upload"></i> Upload Document
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Breadcrumb navigation -->
+        <nav aria-label="breadcrumb" th:if="${currentFolder != null}">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/folders}">Root</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${currentFolder.name}"></li>
+            </ol>
+        </nav>
+        
+        <!-- Success message -->
+        <div class="alert alert-success alert-dismissible fade show" role="alert" th:if="${successMessage}">
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <!-- Folders section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h3 class="h5">
+                    <i class="bi bi-folder2-open"></i> 
+                    <span th:if="${currentFolder == null}">Root Folders</span>
+                    <span th:if="${currentFolder != null}">Subfolders</span>
+                </h3>
+                
+                <div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
+                    <!-- Parent folder navigation -->
+                    <div class="col" th:if="${currentFolder != null && currentFolder.parent != null}">
+                        <div class="card h-100 border-secondary">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-arrow-left-circle"></i> Parent Folder
+                                </h5>
+                                <p class="card-text text-muted" th:text="${currentFolder.parent.name}"></p>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a th:href="@{/folders(parentId=${currentFolder.parent.id})}" class="btn btn-sm btn-outline-secondary">
+                                    Go to Parent
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Folders list -->
+                    <div class="col" th:each="folder : ${folders}">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-folder2"></i> 
+                                    <span th:text="${folder.name}"></span>
+                                </h5>
+                                <p class="card-text" th:text="${#strings.abbreviate(folder.description ?: 'No description', 100)}"></p>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        Created: <span th:text="${#temporals.format(folder.createdAt, 'dd-MM-yyyy')}"></span>
+                                    </small>
+                                </p>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <div class="btn-group" role="group">
+                                    <a th:href="@{/folders(parentId=${folder.id})}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-folder2-open"></i> Open
+                                    </a>
+                                    <a th:href="@{/folders/{id}(id=${folder.id})}" class="btn btn-sm btn-info">
+                                        <i class="bi bi-info-circle"></i> Details
+                                    </a>
+                                    <a th:href="@{/folders/{id}/edit(id=${folder.id})}" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger" 
+                                            data-bs-toggle="modal" th:data-bs-target="'#deleteModal' + ${folder.id}">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Delete Confirmation Modal -->
+                        <div class="modal fade" th:id="'deleteModal' + ${folder.id}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to delete the folder "<span th:text="${folder.name}"></span>"?
+                                        This will also delete all subfolders and documents within this folder.
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <form th:action="@{/folders/{id}/delete(id=${folder.id})}" method="post">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Empty state -->
+                    <div class="col-12" th:if="${#lists.isEmpty(folders)}">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <span th:if="${currentFolder == null}">No folders found. Create a new folder to get started.</span>
+                            <span th:if="${currentFolder != null}">This folder has no subfolders.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Documents section (only if inside a folder) -->
+        <div class="row mt-4" th:if="${currentFolder != null}">
+            <div class="col-12">
+                <h3 class="h5"><i class="bi bi-file-earmark"></i> Documents</h3>
+                
+                <div class="table-responsive mt-2">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="doc : ${currentFolder.documents}" th:if="${doc.deletedAt == null}">
+                                <td>
+                                    <i class="bi bi-file-earmark" th:classappend="${#strings.startsWith(doc.mimeType, 'image/') ? ' bi-file-earmark-image' : 
+                                                              (#strings.startsWith(doc.mimeType, 'application/pdf') ? ' bi-file-earmark-pdf' : 
+                                                              (#strings.startsWith(doc.mimeType, 'text/') ? ' bi-file-earmark-text' : ''))}"></i>
+                                    <span th:text="${doc.name}"></span>
+                                </td>
+                                <td th:text="${doc.mimeType}"></td>
+                                <td th:text="${#numbers.formatDecimal(doc.size / 1024, 0, 2) + ' KB'}"></td>
+                                <td th:text="${#temporals.format(doc.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a th:href="@{/documents/{id}/download(id=${doc.id})}" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-download"></i> Download
+                                        </a>
+                                        <a th:href="@{/documents/{id}(id=${doc.id})}" class="btn btn-sm btn-info">
+                                            <i class="bi bi-info-circle"></i> Details
+                                        </a>
+                                        <a th:href="@{/documents/{id}/edit(id=${doc.id})}" class="btn btn-sm btn-warning">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-danger" 
+                                                data-bs-toggle="modal" th:data-bs-target="'#deleteDocModal' + ${doc.id}">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Delete Document Confirmation Modal -->
+                                    <div class="modal fade" th:id="'deleteDocModal' + ${doc.id}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete the document "<span th:text="${doc.name}"></span>"?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form th:action="@{/documents/{id}/delete(id=${doc.id})}" method="post">
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(currentFolder.documents) || currentFolder.documents.?[deletedAt == null].empty}">
+                                <td colspan="5" class="text-center">No documents in this folder.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div th:replace="~{menu/footer :: footer}"></div>
+</body>
+</html>

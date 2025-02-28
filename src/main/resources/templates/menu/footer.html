@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <footer th:fragment="footer" class="bg-light py-3 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2025 DocKeeper - Document Management System</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <span class="text-muted">Version 1.0</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bootstrap JavaScript Bundle with Popper -->
+        <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+        
+        <!-- Custom scripts -->
+        <script>
+            // Initialize tooltips
+            document.addEventListener('DOMContentLoaded', function() {
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            });
+            
+            // Flash messages auto-close
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    var alerts = document.querySelectorAll('.alert-success, .alert-info');
+                    alerts.forEach(function(alert) {
+                        var bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    });
+                }, 5000);
+            });
+        </script>
+    </footer>
+</body>
+</html>

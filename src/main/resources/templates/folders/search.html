@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{menu/header :: header('Search Folders')}"></head>
+<body>
+    <div th:replace="~{menu/sidebar :: sidebar}"></div>
+    
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+                <i class="bi bi-search"></i> Search Results: 
+                <small class="text-muted" th:text="${searchQuery}"></small>
+            </h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <form class="d-flex" th:action="@{/folders/search}" method="get">
+                    <input class="form-control me-2" type="search" placeholder="Search folders..." 
+                           name="query" th:value="${searchQuery}" aria-label="Search">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/folders}">Folders</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Search Results</li>
+            </ol>
+        </nav>
+        
+        <div class="alert alert-info" th:if="${#lists.isEmpty(folders)}">
+            <i class="bi bi-info-circle"></i> No folders found matching "<span th:text="${searchQuery}"></span>".
+        </div>
+        
+        <div class="row mt-4" th:if="${not #lists.isEmpty(folders)}">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-folder2"></i> Found <span th:text="${folders.size()}"></span> folders
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <div th:each="folder : ${folders}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">
+                                        <i class="bi bi-folder2"></i>
+                                        <a th:href="@{/folders/{id}(id=${folder.id})}" th:text="${folder.name}"></a>
+                                    </h5>
+                                    <small th:text="${#temporals.format(folder.createdAt, 'dd-MM-yyyy')}"></small>
+                                </div>
+                                <p class="mb-1" th:if="${folder.description}" th:text="${folder.description}"></p>
+                                <p class="mb-1" th:if="${folder.description == null}"><em>No description provided</em></p>
+                                <small>
+                                    <span th:if="${folder.parent != null}">
+                                        Parent: <a th:href="@{/folders/{id}(id=${folder.parent.id})}" th:text="${folder.parent.name}"></a>
+                                    </span>
+                                    <span th:if="${folder.parent == null}">Root folder</span>
+                                    <span class="ms-3">
+                                        Created by: <span th:text="${folder.createdBy.username}"></span>
+                                    </span>
+                                </small>
+                                
+                                <div class="mt-2 d-flex justify-content-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/folders(parentId=${folder.id})}" class="btn btn-primary">
+                                            <i class="bi bi-folder2-open"></i> Open
+                                        </a>
+                                        <a th:href="@{/folders/{id}(id=${folder.id})}" class="btn btn-info">
+                                            <i class="bi bi-info-circle"></i> Details
+                                        </a>
+                                        <a th:href="@{/folders/{id}/edit(id=${folder.id})}" class="btn btn-warning">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div th:replace="~{menu/footer :: footer}"></div>
+</body>
+</html>

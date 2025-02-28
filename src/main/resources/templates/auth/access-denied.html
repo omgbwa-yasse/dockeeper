@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{menu/header :: header('Access Denied')}"></head>
+<body>
+    <div th:replace="~{menu/sidebar :: sidebar}"></div>
+    
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">Access Denied</div>
+                    <div class="card-body">
+                        <h5 class="card-title">You don't have permission to access this resource.</h5>
+                        <p class="card-text">Please contact your administrator if you believe this is an error.</p>
+                        <a th:href="@{/}" class="btn btn-primary">Go Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="~{menu/footer :: footer}"></div>
+</body>
+</html>

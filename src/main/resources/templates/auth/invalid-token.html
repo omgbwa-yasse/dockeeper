@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{menu/header :: header('Invalid Token')}"></head>
+<body>
+    <div th:replace="~{menu/sidebar :: sidebar}"></div>
+    
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning">Invalid or Expired Token</div>
+                    <div class="card-body">
+                        <p class="card-text">The password reset link you used is invalid or has expired.</p>
+                        <a th:href="@{/forgot-password}" class="btn btn-primary">Request New Link</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="~{menu/footer :: footer}"></div>
+</body>
+</html>

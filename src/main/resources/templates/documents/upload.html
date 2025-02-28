@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{menu/header :: header('Upload Document')}"></head>
+<body>
+    <div th:replace="~{menu/sidebar :: sidebar}"></div>
+    
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="bi bi-upload"></i> Upload Document</h1>
+        </div>
+        
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/documents}">Documents</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Upload</li>
+            </ol>
+        </nav>
+        
+        <!-- Error message -->
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${errorMessage}">
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-8 col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <form th:action="@{/documents/upload}" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="file" class="form-label">Select File <span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" id="file" name="file" required>
+                                <div class="form-text">Maximum file size: 10MB</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="folderId" class="form-label">Select Folder <span class="text-danger">*</span></label>
+                                <select class="form-select" id="folderId" name="folderId" required>
+                                    <option value="" disabled selected>Choose a folder...</option>
+                                    <option th:each="folder : ${folders}" 
+                                            th:value="${folder.id}" 
+                                            th:text="${folder.name}"
+                                            th:selected="${document.folder != null && document.folder.id == folder.id}">
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a th:href="@{/documents}" class="btn btn-secondary me-md-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary">Upload Document</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-info-circle"></i> Help
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Uploading Documents</h5>
+                        <p class="card-text">You can upload various types of documents to organize and share with your team.</p>
+                        <ul>
+                            <li><strong>File:</strong> Required. Select a file from your computer (max 10MB).</li>
+                            <li><strong>Description:</strong> Optional. Provide details about the document to help others understand its purpose.</li>
+                            <li><strong>Folder:</strong> Required. Choose a folder to store the document.</li>
+                        </ul>
+                        
+                        <h5 class="card-title mt-4">Supported File Types</h5>
+                        <ul>
+                            <li>Documents: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT</li>
+                            <li>Images: JPG, JPEG, PNG, GIF, BMP, SVG</li>
+                            <li>Archives: ZIP, RAR, 7Z</li>
+                            <li>And many more...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div th:replace="~{menu/footer :: footer}"></div>
+</body>
+</html>

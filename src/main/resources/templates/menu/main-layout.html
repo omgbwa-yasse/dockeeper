@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{menu/header :: header(${title})}"></head>
+<body>
+    <div th:replace="~{menu/sidebar :: sidebar}"></div>
+    
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <!-- Alert messages -->
+        <div class="alert alert-success alert-dismissible fade show" role="alert" th:if="${successMessage}">
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${errorMessage}">
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Main content will be inserted here -->
+        <div th:replace="${content}">
+            Content goes here
+        </div>
+    </main>
+    
+    <div th:replace="~{menu/footer :: footer}"></div>
+</body>
+</html>

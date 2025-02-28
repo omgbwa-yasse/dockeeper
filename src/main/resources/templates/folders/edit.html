@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{menu/header :: header('Edit Folder')}"></head>
+<body>
+    <div th:replace="~{menu/sidebar :: sidebar}"></div>
+    
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="bi bi-pencil-square"></i> Edit Folder</h1>
+        </div>
+        
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/folders}">Folders</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/folders/{id}(id=${folder.id})}" th:text="${folder.name}"></a></li>
+                <li class="breadcrumb-item active" aria-current="page">Edit</li>
+            </ol>
+        </nav>
+        
+        <div class="row mt-4">
+            <div class="col-md-8 col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <form th:action="@{/folders/{id}/edit(id=${folder.id})}" th:object="${folder}" method="post">
+                            <!-- Hidden field for ID -->
+                            <input type="hidden" th:field="*{id}">
+                            
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Folder Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                                <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" th:field="*{description}" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="parent" class="form-label">Parent Folder</label>
+                                <select class="form-select" id="parent" th:field="*{parent}">
+                                    <option value="">-- No Parent (Root Level) --</option>
+                                    <option th:each="parentFolder : ${parentFolders}" 
+                                            th:value="${parentFolder.id}" 
+                                            th:text="${parentFolder.name}">
+                                    </option>
+                                </select>
+                                <div class="form-text">Changing the parent folder will move this folder and all its contents.</div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a th:href="@{/folders/{id}(id=${folder.id})}" class="btn btn-secondary me-md-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <i class="bi bi-info-circle"></i> Folder Information
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-4">Created By</dt>
+                            <dd class="col-sm-8" th:text="${folder.createdBy.username}"></dd>
+                            
+                            <dt class="col-sm-4">Created At</dt>
+                            <dd class="col-sm-8" th:text="${#temporals.format(folder.createdAt, 'dd-MM-yyyy HH:mm')}"></dd>
+                            
+                            <dt class="col-sm-4">Last Updated</dt>
+                            <dd class="col-sm-8" th:text="${folder.updatedAt != null ? #temporals.format(folder.updatedAt, 'dd-MM-yyyy HH:mm') : 'Never'}"></dd>
+                            
+                            <dt class="col-sm-4">Subfolders</dt>
+                            <dd class="col-sm-8" th:text="${folder.subfolders.size()}"></dd>
+                            
+                            <dt class="col-sm-4">Documents</dt>
+                            <dd class="col-sm-8" th:text="${folder.documents.?[deletedAt == null].size()}"></dd>
+                        </dl>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header bg-warning">
+                        <i class="bi bi-exclamation-triangle"></i> Warning
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Moving a folder may affect user access and existing links to documents. Make sure you understand the implications before changing the folder structure.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div th:replace="~{menu/footer :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{menu/header :: header('All Documents')}"></head>
+<body>
+    <div th:replace="~{menu/sidebar :: sidebar}"></div>
+    
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+                <i class="bi bi-file-earmark"></i> All Documents
+            </h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group me-2">
+                    <a th:href="@{/documents/upload}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-upload"></i> Upload Document
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleFilters">
+                        <i class="bi bi-funnel"></i> Filters
+                    </button>
+                </div>
+                <form class="d-flex" th:action="@{/documents/search}" method="get">
+                    <input class="form-control me-2" type="search" placeholder="Search documents..." 
+                           name="query" aria-label="Search">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Documents</li>
+            </ol>
+        </nav>
+        
+        <!-- Success message -->
+        <div class="alert alert-success alert-dismissible fade show" role="alert" th:if="${successMessage}">
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <!-- Filters (hidden by default) -->
+        <div id="filtersPanel" class="card mb-4" style="display: none;">
+            <div class="card-header">
+                <i class="bi bi-funnel"></i> Filter Documents
+            </div>
+            <div class="card-body">
+                <form th:action="@{/documents}" method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="mimeType" class="form-label">File Type</label>
+                        <select class="form-select" id="mimeType" name="mimeType">
+                            <option value="">All Types</option>
+                            <option value="application/pdf">PDF Documents</option>
+                            <option value="image/">Images</option>
+                            <option value="text/">Text Files</option>
+                            <option value="application/vnd.openxmlformats-officedocument">Office Documents</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="fromDate" class="form-label">From Date</label>
+                        <input type="date" class="form-control" id="fromDate" name="fromDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="toDate" class="form-label">To Date</label>
+                        <input type="date" class="form-control" id="toDate" name="toDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="createdBy" class="form-label">Created By</label>
+                        <input type="text" class="form-control" id="createdBy" name="createdBy">
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="reset" class="btn btn-secondary">Reset</button>
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Documents list -->
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-files"></i> Documents</span>
+                    <span class="badge bg-primary" th:text="${documents.size() + ' items'}"></span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Folder</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="doc : ${documents}">
+                                <td>
+                                    <i class="bi" 
+                                       th:classappend="${#strings.startsWith(doc.mimeType, 'image/') ? 'bi-file-earmark-image' : 
+                                                      (#strings.startsWith(doc.mimeType, 'application/pdf') ? 'bi-file-earmark-pdf' : 
+                                                      (#strings.startsWith(doc.mimeType, 'text/') ? 'bi-file-earmark-text' : 'bi-file-earmark'))}"></i>
+                                    <a th:href="@{/documents/{id}(id=${doc.id})}" th:text="${doc.name}"></a>
+                                </td>
+                                <td th:text="${doc.mimeType}"></td>
+                                <td th:text="${#numbers.formatDecimal(doc.size / 1024, 0, 2) + ' KB'}"></td>
+                                <td>
+                                    <a th:if="${doc.folder != null}" th:href="@{/folders/{id}(id=${doc.folder.id})}" th:text="${doc.folder.name}"></a>
+                                    <span th:if="${doc.folder == null}">-</span>
+                                </td>
+                                <td th:text="${#temporals.format(doc.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a th:href="@{/documents/{id}/download(id=${doc.id})}" class="btn btn-primary" title="Download">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                        <a th:href="@{/documents/{id}(id=${doc.id})}" class="btn btn-info" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a th:href="@{/documents/{id}/edit(id=${doc.id})}" class="btn btn-warning" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-danger" title="Delete" 
+                                                data-bs-toggle="modal" th:data-bs-target="'#deleteDocModal' + ${doc.id}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Delete Document Modal -->
+                                    <div class="modal fade" th:id="'deleteDocModal' + ${doc.id}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Delete Document</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete the document "<span th:text="${doc.name}"></span>"?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form th:action="@{/documents/{id}/delete(id=${doc.id})}" method="post">
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(documents)}">
+                                <td colspan="6" class="text-center">No documents found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div th:replace="~{menu/footer :: footer}"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleFilters = document.getElementById('toggleFilters');
+            const filtersPanel = document.getElementById('filtersPanel');
+            
+            toggleFilters.addEventListener('click', function() {
+                if (filtersPanel.style.display === 'none') {
+                    filtersPanel.style.display = 'block';
+                    toggleFilters.innerHTML = '<i class="bi bi-funnel-fill"></i> Filters';
+                } else {
+                    filtersPanel.style.display = 'none';
+                    toggleFilters.innerHTML = '<i class="bi bi-funnel"></i> Filters';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
